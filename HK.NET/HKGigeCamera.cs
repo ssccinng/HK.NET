@@ -14,6 +14,21 @@ namespace HK.NET
 {
     public class HKGigeCamera : IDisposable
     {
+        protected cbOutputExdelegate cbImage;
+
+        public void ImageCallBack(IntPtr pData, ref MV_FRAME_OUT_INFO_EX pFrameInfo, IntPtr pUser)
+        {
+            Debug.WriteLine("回调");
+            Debug.WriteLine("Get One Frame:" + "Width[" + Convert.ToString(pFrameInfo.nWidth) + "] , Height[" + Convert.ToString(pFrameInfo.nHeight)
+                           + "] , FrameNum[" + Convert.ToString(pFrameInfo.nFrameNum) + "]");
+            FrameInfoQueue.Enqueue((pData, pFrameInfo));
+            //pFrameInfo.
+            //HKGigeCamera nIndex = (HKGigeCamera)pUser;//这里就是刚才注册的(IntPtr)i的pUser
+
+            // ch:抓取的帧数 | en:Aquired Frame Number
+            
+        }
+
         public uint MaxWidth { get; protected set; }
         public uint MaxHeight { get; protected set; }
         public uint FrameRate { get; protected set; }
@@ -22,13 +37,13 @@ namespace HK.NET
         public bool IsActive { get; protected set; }
 
 
-        protected MyCamera _myCamera = new();
+        protected MyCamera _myCamera  = new();
 
         protected MV_CC_DEVICE_INFO _deviceInfo;
         protected MV_GIGE_DEVICE_INFO _gigaCamInfo;
         public MV_GIGE_DEVICE_INFO GigaCamInfo => _gigaCamInfo;
 
-
+        public Queue<(IntPtr, MV_FRAME_OUT_INFO_EX)> FrameInfoQueue = new();
         public static List<HKGigeCamera> CreateCameras(List<string> code)
         {
             List<HKGigeCamera> hKGigeCameras = new();
@@ -42,6 +57,19 @@ namespace HK.NET
             return hKGigeCameras;
         }
 
+        //public static List<T> CreateCameras<T>(List<string> code) where T : HKGigeCamera, new()
+        //{
+        //    List<T> hKGigeCameras = new();
+        //    var cams = SciHKCore.GetDeviceInfoListFull()
+        //        .Where(s => s.nTLayerType == MV_GIGE_DEVICE)
+        //        .Select(s => new { Cam = s, GigeCam = SciHKCore.GetGigeDeviveInfo(s) });
+        //    foreach (var cam in cams)
+        //    {
+        //        hKGigeCameras.Add(new T(cam.Cam, cam.GigeCam.Value));
+        //    }
+        //    return hKGigeCameras;
+        //}
+
         ///// <summary>
         ///// 初始化为第一个
         ///// </summary>
@@ -52,6 +80,7 @@ namespace HK.NET
 
         public HKGigeCamera(string code)
         {
+            //cbImage = new cbOutputExdelegate(ImageCallBack);
             _code = code;
             var cam = SciHKCore.GetDeviceInfoListFull()
                 .Where(s => s.nTLayerType == MV_GIGE_DEVICE)
@@ -91,9 +120,9 @@ namespace HK.NET
             _code = gigaCamInfo.chSerialNumber;
             _deviceInfo = deviceInfo;
             _gigaCamInfo = gigaCamInfo;
+            CreateDevice();
             //_myCamera.
             //_gigaCamInfo.nCurrentIp = IpConvert("192.168.1.155");
-            CreateDevice();
         }
         ~HKGigeCamera()
         {
@@ -200,7 +229,7 @@ namespace HK.NET
         /// 创建驱动
         /// </summary>
         /// <returns></returns>
-        public bool CreateDevice()
+        public virtual bool CreateDevice()
         {
             var nRet = _myCamera.MV_CC_CreateDevice_NET(ref _deviceInfo);
             if (nRet != MV_OK)
@@ -214,7 +243,7 @@ namespace HK.NET
         /// 开启驱动
         /// </summary>
         /// <returns></returns>
-        public bool OpenDevice()
+        public virtual bool OpenDevice()
         {
             var nRet = _myCamera.MV_CC_OpenDevice_NET();
             if (nRet != MV_OK)
@@ -222,6 +251,7 @@ namespace HK.NET
                 Debug.WriteLine("Create device failed:{0:x8}", nRet);
                 return false;
             }
+
             return true;
         }
         public bool GetWidthHeight()

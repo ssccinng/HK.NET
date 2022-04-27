@@ -4,6 +4,9 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using static HKTest.Class1;
 
+
+
+
 var list = SciHKCore.GetDeviceInfoListFull();
 for (int i = 0; i < list.Count; i++)
 {
@@ -11,12 +14,23 @@ for (int i = 0; i < list.Count; i++)
     
 }
 
-var vv = new HKGigeLineCamera("00J39700886");
+var cc1 = HKTestMCam.CreateCameras(new List<string> { "00D08414152", "J58494175" });
+for (int i = 0; i < cc1.Count; i++)
+{
+    Console.WriteLine(cc1[i].InitCamera());
+}
+//cc1[0].GetImages();
+Console.ReadKey();
+return;
 
+//var vv = new HKGigeTriggerCamera("00J39700886");
+var vv = new HKGigeLineCamera("00J39700886");
 vv.InitCamera();
+vv.StartGrabbing();
 
 Console.ReadKey();
-
+vv.GetImage(out var ba);
+//File.WriteAllBytes($"linliu.bmp", ba);
 
 
 return;
