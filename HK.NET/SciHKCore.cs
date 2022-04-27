@@ -20,6 +20,7 @@ namespace HK.NET
         public static MV_CC_DEVICE_INFO_LIST GetDeviceInfoList()
         {
             MV_CC_DEVICE_INFO_LIST stDevList = new();
+            
             var nRet = MyCamera.MV_CC_EnumDevices_NET(MyCamera.MV_GIGE_DEVICE | MyCamera.MV_USB_DEVICE, ref stDevList);
             stDevList.pDeviceInfo = stDevList.pDeviceInfo.TakeWhile(s => s != IntPtr.Zero).ToArray();
             if (MyCamera.MV_OK != nRet)
@@ -38,7 +39,6 @@ namespace HK.NET
 
         public static MV_GIGE_DEVICE_INFO? GetGigeDeviveInfo(MV_CC_DEVICE_INFO stDevInfo)
         {
-
             if (MyCamera.MV_GIGE_DEVICE == stDevInfo.nTLayerType)
             {
                 MV_GIGE_DEVICE_INFO stGigEDeviceInfo = (MV_GIGE_DEVICE_INFO)MyCamera.ByteToStruct(stDevInfo.SpecialInfo.stGigEInfo, typeof(MyCamera.MV_GIGE_DEVICE_INFO));
