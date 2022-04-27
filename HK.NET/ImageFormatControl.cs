@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace HK.NET
 {
+    /// <summary>
+    /// 图片控制 暂时先这样
+    /// </summary>
     public class ImageFormatControl
     {
-        public int? Width { get; set; }
-        public int? Height { get; set; }
+        public uint? Width { get; set; }
+        public uint? Height { get; set; }
 
-        public int? OffsetX { get; set; }
-        public int? OffsetY { get; set; }
+        public uint? OffsetX { get; set; }
+        public uint? OffsetY { get; set; }
     }
 }

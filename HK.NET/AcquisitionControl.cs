@@ -10,13 +10,23 @@ using static MvCamCtrl.NET.MyCamera;
 
 namespace HK.NET
 {
-    //public enum AcquisitionMode
-    //{
-    //    SingleFrame,
-    //    MultiFrame,
-    //    Continuous,
-    //}
-    internal class AcquisitionControl
+    public enum TriggerActivation
+    {
+        RisingEdge,
+
+        FallingEdge,
+
+        LevelHigh,
+
+        LevelLow,
+
+        //SingleFrame,
+        //MultiFrame,
+        //Continuous,     SingleFrame,
+        //MultiFrame,
+        //Continuous,
+    }
+    public class AcquisitionControl
     {
         /// <summary>
         /// 采集模式
@@ -25,17 +35,32 @@ namespace HK.NET
         /// <summary>
         /// 一次触发采集帧数
         /// </summary>
-        public int? AcquisitionBurstFrameCount { get; set; }
+        public uint? AcquisitionBurstFrameCount { get; set; }
         /// <summary>
         /// 行频设置
         /// </summary>
-        public int? AcquisitionLineRate { get; set; }
+        public uint? AcquisitionLineRate { get; set; }
         /// <summary>
         /// 行频使能设置
         /// </summary>
         public bool? AcquisitionLineRateEnable {get;set;}
             
-
-
+        /// <summary>
+        /// 触发模式
+        /// </summary>
+        public MV_CAM_TRIGGER_MODE? TriggerMode { get; set; }
+        /// <summary>
+        /// 触发源
+        /// </summary>
+        public MV_CAM_TRIGGER_SOURCE? TriggerSource { get; set; }
+        /// <summary>
+        /// 触发方式
+        /// </summary>
+        public TriggerActivation? TriggerActivation { get; set; }
+        /// <summary>
+        /// 曝光时间
+        /// </summary>
+        public uint? ExposureTime { get; set; }
+        public float? TriggerDelay { get; set; }
     }
 }

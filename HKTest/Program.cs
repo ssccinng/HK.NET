@@ -10,6 +10,16 @@ for (int i = 0; i < list.Count; i++)
     Console.WriteLine(list[i].nMajorVer);
     
 }
+
+var vv = new HKGigeLineCamera("00J39700886");
+
+vv.InitCamera();
+
+Console.ReadKey();
+
+
+
+return;
 var cc = HKGigeTriggerCamera.CreateCameras(new List<string> { "00D08414152", "J58494175" });
 //HKGigeCamera HKGigeCamera = new HKGigeCamera("00D08414152");
 //cc[0].ConnectCamera();

@@ -12,7 +12,7 @@ using static MvCamCtrl.NET.MyCamera;
 
 namespace HK.NET
 {
-    public class HKGigeCamera: IDisposable
+    public class HKGigeCamera : IDisposable
     {
         public uint MaxWidth { get; protected set; }
         public uint MaxHeight { get; protected set; }
@@ -49,14 +49,14 @@ namespace HK.NET
         //{
 
         //}
-        
+
         public HKGigeCamera(string code)
         {
             _code = code;
             var cam = SciHKCore.GetDeviceInfoListFull()
                 .Where(s => s.nTLayerType == MV_GIGE_DEVICE)
                 .Select(s => new { Cam = s, GigeCam = SciHKCore.GetGigeDeviveInfo(s) })
-            
+
                 .FirstOrDefault(s => s.GigeCam.HasValue && s.GigeCam.Value.chSerialNumber == code);
             if (cam == null)
             {
@@ -91,6 +91,7 @@ namespace HK.NET
             _code = gigaCamInfo.chSerialNumber;
             _deviceInfo = deviceInfo;
             _gigaCamInfo = gigaCamInfo;
+            //_myCamera.
             //_gigaCamInfo.nCurrentIp = IpConvert("192.168.1.155");
             CreateDevice();
         }
@@ -104,7 +105,7 @@ namespace HK.NET
         /// <returns></returns>
         public bool ResetCamera()
         {
-           
+
             if (_myCamera.MV_CC_SetCommandValue_NET("DeviceReset") != MV_OK)
             {
                 Debug.WriteLine("重启设备失败");
@@ -164,18 +165,15 @@ namespace HK.NET
             }
 
             return true;
-           
-        }
-        /// <summary>
-        /// 设置图片模式
-        /// </summary>
-        /// <returns></returns>
-        public bool SetImageFormat(ImageFormatControl imageFormatControl)
-        {
 
-            return true;
         }
-        
+
+        //public bool SetImageFormat(ImageFormatControl imageFormatControl)
+        //{
+
+        //    return true;
+        //}
+
         public bool TryGetFps(out float fps)
         {
             MVCC_FLOATVALUE val = new();
@@ -299,7 +297,7 @@ namespace HK.NET
                 return false;
             }
             return true;
-            
+
         }
 
         /// <summary>
@@ -313,7 +311,7 @@ namespace HK.NET
             if (MV_OK != nRet)
             {
                 Console.WriteLine("Start grabbing failed:{0:x8}", nRet);
-                return false ;
+                return false;
             }
             return true;
         }
@@ -368,7 +366,7 @@ namespace HK.NET
         {
             MVCC_INTVALUE linliu = new();
 
-            
+
             //if (MV_OK != _myCamera.MV_CC_SetBoolValue_NET("DeviceLinkHeartbeatMode", true))
             //{
             //    Debug.WriteLine("Set HeartbeatTimeout failed!");
@@ -390,10 +388,10 @@ namespace HK.NET
         /// </summary>
         /// <param name="stParam"></param>
         /// <returns></returns>
-       protected bool GetPayloadSize(out MVCC_INTVALUE stParam)
+        protected bool GetPayloadSize(out MVCC_INTVALUE stParam)
         {
             stParam = new();
-            
+
             var nRet = _myCamera.MV_CC_GetIntValue_NET("PayloadSize", ref stParam);
             if (MyCamera.MV_OK != nRet)
             {
@@ -439,7 +437,7 @@ namespace HK.NET
         {
             var nRet = _myCamera.MV_GIGE_SetIpConfig_NET(MV_IP_CFG_STATIC);
             //nRet = _myCamera.MV_CC_SetBoolValue_NET("GevCurrentIPConfigurationPersistentIP", true);
-            nRet = _myCamera.MV_GIGE_ForceIpEx_NET(IpConvert(ip), IpConvert(mask), IpConvert(gateway) );
+            nRet = _myCamera.MV_GIGE_ForceIpEx_NET(IpConvert(ip), IpConvert(mask), IpConvert(gateway));
             _gigaCamInfo.nCurrentIp = IpConvert(ip);
             _gigaCamInfo.nCurrentSubNetMask = IpConvert(mask);
             _gigaCamInfo.nDefultGateWay = IpConvert(gateway);
@@ -466,6 +464,206 @@ namespace HK.NET
             //IPEndPoint.Parse(ip).Address.Address
 
         }
+
+        public bool SetAcquisitionMode(MV_CAM_ACQUISITION_MODE mode)
+        {
+            var nRet = _myCamera.MV_CC_SetEnumValue_NET("AcquisitionMode", (uint)mode);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置采集模式失败: {0}", nRet);
+                return false;
+            }
+            return true;
+        }
+        /// <summary>
+        /// 一次触发采集的帧数
+        /// </summary>
+        /// <param name="value"></param>
+        public bool SetAcquisitionBurstFrameCount(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("AcquisitionBurstFrameCount", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置倍频失败: {0}", nRet);
+            }
+            return true;
+        }
+        /// <summary>
+        /// 行频设置
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetAcquisitionLineRate(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("AcquisitionLineRate", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置倍频失败: {0}", nRet);
+            }
+            return true;
+        }
+        /// <summary>
+        /// 行频使能
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetAcquisitionLineRateEnable(bool value)
+        {
+            var nRet = _myCamera.MV_CC_SetBoolValue_NET("AcquisitionLineRateEnable", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置行频使能失败: {0}", nRet);
+            }
+            return true;
+        }
+        /// <summary>
+        /// 触发上升沿、下降沿、高电平、低电平等
+        /// </summary>
+        /// <param name="triggerActivation"></param>
+        /// <returns></returns>
+        public bool SetTriggerActivation(TriggerActivation triggerActivation)
+        {
+            var nRet = _myCamera.MV_CC_SetEnumValue_NET("TriggerActivation", (uint)triggerActivation);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置行频使能失败: {0}", nRet);
+            }
+            return true;
+        }
+        /// <summary>
+        /// 设置触发延时
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetTriggerDelay(float value)
+        {
+            var nRet = _myCamera.MV_CC_SetFloatValue_NET("TriggerDelay", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置倍频失败: {0}", nRet);
+            }
+            return true;
+        }
+
+        public bool SetImageWidth(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("Width", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置图像宽度失败: {0}", nRet);
+            }
+            return true;
+        }
+        /// <summary>
+        /// 设置图像宽度
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetImageHeight(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("Height", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置图像高度失败: {0}", nRet);
+            }
+            return true;
+        }
+        public bool SetOffsetX(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("OffsetX", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置图像OffsetX失败: {0}", nRet);
+            }
+            return true;
+        }
+        public bool SetOffsetY(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("OffsetY", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置图像OffsetY失败: {0}", nRet);
+            }
+            return true;
+        }
+
+        public virtual bool GetImage(out byte[] imageBytes)
+        {
+            imageBytes = new byte[0];
+            return true;
+        }
+        /// <summary>
+        /// 设置图片模式
+        /// </summary>
+        /// <returns></returns>
+        public bool SetImageFormat(ImageFormatControl imageFormatControl)
+        {
+            bool flag = true;
+            if (imageFormatControl.Width != null)
+            {
+                flag &= SetImageWidth(imageFormatControl.Width.Value);
+            }
+            if (imageFormatControl.Height != null)
+            {
+                flag &= SetImageHeight(imageFormatControl.Height.Value);
+            }
+            if (imageFormatControl.OffsetX != null)
+            {
+                flag &= SetOffsetX(imageFormatControl.OffsetX.Value);
+            }
+            if (imageFormatControl.OffsetY != null)
+            {
+                flag &= SetOffsetY(imageFormatControl.OffsetY.Value);
+            }
+            return flag;
+        }
+        public bool SetAcquisition(AcquisitionControl acquisitionControl)
+        {
+            bool flag = true;
+            if (acquisitionControl.AcquisitionMode != null)
+            {
+                flag &= SetAcquisitionMode(acquisitionControl.AcquisitionMode.Value);
+            }
+            if (acquisitionControl.AcquisitionBurstFrameCount != null)
+            {
+                flag &= SetAcquisitionBurstFrameCount(acquisitionControl.AcquisitionBurstFrameCount.Value);
+            }
+            if (acquisitionControl.AcquisitionLineRateEnable != null)
+            {
+                flag &= SetAcquisitionLineRateEnable(acquisitionControl.AcquisitionLineRateEnable.Value);
+            }
+            if (acquisitionControl.AcquisitionLineRate != null)
+            {
+                flag &= SetAcquisitionLineRate(acquisitionControl.AcquisitionLineRate.Value);
+            }
+            if (acquisitionControl.TriggerMode != null)
+            {
+                flag &= SetTriggerMode(acquisitionControl.TriggerMode.Value);
+            }
+            if (acquisitionControl.TriggerSource != null)
+            {
+                flag &= SetTriggerSource(acquisitionControl.TriggerSource.Value);
+            }
+            if (acquisitionControl.TriggerActivation != null)
+            {
+                flag &= SetTriggerActivation(acquisitionControl.TriggerActivation.Value);
+            }
+            if (acquisitionControl.TriggerDelay != null)
+            {
+                flag &= SetTriggerDelay(acquisitionControl.TriggerDelay.Value);
+            }
+            if (acquisitionControl.ExposureTime != null)
+            {
+                flag &= SetExposureTime(acquisitionControl.ExposureTime.Value);
+            }
+            return flag;
+        }
+        //public bool SetTriggerSelector()
+        /// <summary>
+        /// IP转换工具
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
         protected uint IpConvert(string ip)
         {
             uint[] ip4 = ip.Split('.').Select(uint.Parse).ToArray();
@@ -477,6 +675,8 @@ namespace HK.NET
             }
             return res;
         }
+
+        
         /// <summary>
         /// test
         /// </summary>
