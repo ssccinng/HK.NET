@@ -18,10 +18,48 @@ namespace HK.NET
 
         public void ImageCallBack(IntPtr pData, ref MV_FRAME_OUT_INFO_EX pFrameInfo, IntPtr pUser)
         {
+            // 这个有可能变慢
+            //if (!GetPayloadSize(out var stParam)) ;
+            //UInt32 nPayloadSize = stParam.nCurValue;
+            //IntPtr pBufForDriver = Marshal.AllocHGlobal((int)nPayloadSize);
+            IntPtr pBufForSaveImage = IntPtr.Zero;
             Debug.WriteLine("回调");
-            Debug.WriteLine("Get One Frame:" + "Width[" + Convert.ToString(pFrameInfo.nWidth) + "] , Height[" + Convert.ToString(pFrameInfo.nHeight)
-                           + "] , FrameNum[" + Convert.ToString(pFrameInfo.nFrameNum) + "]");
-            FrameInfoQueue.Enqueue((pData, pFrameInfo));
+            //Debug.WriteLine("Get One Frame:" + "Width[" + Convert.ToString(pFrameInfo.nWidth) + "] , Height[" + Convert.ToString(pFrameInfo.nHeight)
+            //               + "] , FrameNum[" + Convert.ToString(pFrameInfo.nFrameNum) + "]");
+
+            //Debug.WriteLine("Get One Frame:" + "Width[" + Convert.ToString(pFrameInfo.nWidth) + "] , Height[" + Convert.ToString(pFrameInfo.nHeight)
+            //               + "] , FrameNum[" + Convert.ToString(pFrameInfo.nFrameNum) + "]");
+
+            if (pBufForSaveImage == IntPtr.Zero)
+            {
+                pBufForSaveImage = Marshal.AllocHGlobal((int)(pFrameInfo.nHeight * pFrameInfo.nWidth * 3 + 2048));
+            }
+
+            MV_SAVE_IMAGE_PARAM_EX stSaveParam = new MV_SAVE_IMAGE_PARAM_EX();
+            stSaveParam.enImageType = MyCamera.MV_SAVE_IAMGE_TYPE.MV_Image_Bmp;
+            stSaveParam.enPixelType = pFrameInfo.enPixelType;
+            //stSaveParam.pData = pBufForDriver;
+            stSaveParam.pData = pData;
+            stSaveParam.nDataLen = pFrameInfo.nFrameLen;
+            stSaveParam.nHeight = pFrameInfo.nHeight;
+            stSaveParam.nWidth = pFrameInfo.nWidth;
+            stSaveParam.pImageBuffer = pBufForSaveImage;
+            stSaveParam.nBufferSize = (uint)(pFrameInfo.nHeight * pFrameInfo.nWidth * 3 + 2048);
+            stSaveParam.nJpgQuality = 80;
+            var nRet = _myCamera.MV_CC_SaveImageEx_NET(ref stSaveParam);
+
+            byte[] imageBytes = new byte[stSaveParam.nImageLen];
+            Marshal.Copy(pBufForSaveImage, imageBytes, 0, (int)imageBytes.Length);
+
+            if (MyCamera.MV_OK != nRet)
+            {
+                Console.WriteLine("Save Image failed:{0:x8}", nRet);
+                //return (false, null);
+                return;
+            }
+
+            //FrameInfoQueue.Enqueue((pData, pFrameInfo));
+            FrameInfoQueue.Enqueue(imageBytes);
             //pFrameInfo.
             //HKGigeCamera nIndex = (HKGigeCamera)pUser;//这里就是刚才注册的(IntPtr)i的pUser
 
@@ -43,7 +81,8 @@ namespace HK.NET
         protected MV_GIGE_DEVICE_INFO _gigaCamInfo;
         public MV_GIGE_DEVICE_INFO GigaCamInfo => _gigaCamInfo;
 
-        public Queue<(IntPtr, MV_FRAME_OUT_INFO_EX)> FrameInfoQueue = new();
+        //public Queue<(IntPtr, MV_FRAME_OUT_INFO_EX)> FrameInfoQueue = new();
+        public Queue<byte[]> FrameInfoQueue = new();
         public static List<HKGigeCamera> CreateCameras(List<string> code)
         {
             List<HKGigeCamera> hKGigeCameras = new();
@@ -220,10 +259,19 @@ namespace HK.NET
         /// <returns></returns>
         public bool CheckConnect()
         {
-            MVCC_INTVALUE val = new();
-            var nRet = _myCamera.MV_CC_GetWidth_NET(ref val);
+            MVCC_FLOATVALUE width = new();
+            var nRet = _myCamera.MV_CC_GetExposureTime_NET(ref width);
+            if (nRet != MV_OK)
+            {
+
+                return false;
+            }
+            //MVCC_INTVALUE val = new();
+            //var nRet = _myCamera.MV_CC_GetWidth_NET(ref val);
+            //var nRet = _myCamera.MV_CC_GetWidth_NET(ref val);
+            return true;
             //Debug.WriteLine($"nRet = {nRet}, val = {val.nCurValue}");
-            return nRet == MV_OK;
+            //return nRet == MV_OK;
         }
         /// <summary>
         /// 创建驱动
@@ -266,7 +314,7 @@ namespace HK.NET
                 return false;
             }
             MaxWidth = widthM.nCurValue;
-            nRet = _myCamera.MV_CC_GetIntValue_NET("HeightMax", ref widthM);
+            nRet = _myCamera.MV_CC_GetIntValue_NET("HeightMax", ref heightM);
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("Warning: 获取最大高度失败 {0:x8}", nRet);
@@ -560,6 +608,15 @@ namespace HK.NET
             }
             return true;
         }
+        public bool SetTriggerSelector(TriggerSelectorType triggerSelectorType)
+        {
+            var nRet = _myCamera.MV_CC_SetEnumValue_NET("TriggerSelector", (uint)triggerSelectorType);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置行频使能失败: {0}", nRet);
+            }
+            return true;
+        }
         /// <summary>
         /// 设置触发延时
         /// </summary>
@@ -617,6 +674,52 @@ namespace HK.NET
             return true;
         }
 
+        public bool SetInputSource(InputSourceType value)
+        {
+            var nRet = _myCamera.MV_CC_SetEnumValue_NET("InputSource", (uint)value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置分频器输入源失败: {0}", nRet);
+            }
+            return true;
+        }
+        public bool SetSignalAlignment(SignalAlignmentType value)
+        {
+            var nRet = _myCamera.MV_CC_SetEnumValue_NET("SignalAlignment", (uint)value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置分频器信号方向失败: {0}", nRet);
+            }
+            return true;
+        }
+        public bool SetPreDivider(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("PreDivider", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置分频器预分频失败: {0}", nRet);
+            }
+            return true;
+        }
+        public bool SetMultiplier(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("Multiplier", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置分频器倍频失败: {0}", nRet);
+            }
+            return true;
+        }
+        public bool SetPostDivider(uint value)
+        {
+            var nRet = _myCamera.MV_CC_SetIntValue_NET("PostDivider", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置分频器后分频失败: {0}", nRet);
+            }
+            return true;
+        }
+
         public virtual bool GetImage(out byte[] imageBytes)
         {
             imageBytes = new byte[0];
@@ -670,6 +773,10 @@ namespace HK.NET
             {
                 flag &= SetTriggerMode(acquisitionControl.TriggerMode.Value);
             }
+            if (acquisitionControl.TriggerSelector != null)
+            {
+                flag &= SetTriggerSelector(acquisitionControl.TriggerSelector.Value);
+            }
             if (acquisitionControl.TriggerSource != null)
             {
                 flag &= SetTriggerSource(acquisitionControl.TriggerSource.Value);
@@ -685,6 +792,32 @@ namespace HK.NET
             if (acquisitionControl.ExposureTime != null)
             {
                 flag &= SetExposureTime(acquisitionControl.ExposureTime.Value);
+            }
+            return flag;
+        }
+
+        public bool SetFrequencyConverterControl(FrequencyConverterControl frequecyConverterControl)
+        {
+            bool flag = true;
+            if (frequecyConverterControl.InputSource != null)
+            {
+                flag &= SetInputSource(frequecyConverterControl.InputSource.Value);
+            }
+            if (frequecyConverterControl.SignalAlignment != null)
+            {
+                flag &= SetSignalAlignment(frequecyConverterControl.SignalAlignment.Value);
+            }
+            if (frequecyConverterControl.PreDivider != null)
+            {
+                flag &= SetPreDivider(frequecyConverterControl.PreDivider.Value);
+            }
+            if (frequecyConverterControl.Multiplier != null)
+            {
+                flag &= SetMultiplier(frequecyConverterControl.Multiplier.Value);
+            }
+            if (frequecyConverterControl.PostDivider != null)
+            {
+                flag &= SetPostDivider(frequecyConverterControl.PostDivider.Value);
             }
             return flag;
         }

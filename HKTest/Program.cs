@@ -7,49 +7,54 @@ using static HKTest.Class1;
 
 
 
-var list = SciHKCore.GetDeviceInfoListFull();
-for (int i = 0; i < list.Count; i++)
-{
-    Console.WriteLine(list[i].nMajorVer);
+//var list = SciHKCore.GetDeviceInfoListFull();
+//for (int i = 0; i < list.Count; i++)
+//{
+//    Console.WriteLine(list[i].nMajorVer);
     
-}
+//}
 
-var cc1 = HKTestMCam.CreateCameras(new List<string> { "00D08414152", "J58494175" });
-for (int i = 0; i < cc1.Count; i++)
-{
-    Console.WriteLine(cc1[i].InitCamera());
-}
-//cc1[0].GetImages();
-Console.ReadKey();
-return;
+//var cc1 = HKTestMCam.CreateCameras(new List<string> { "00D08414152", "J58494175" });
+//for (int i = 0; i < cc1.Count; i++)
+//{
+//    Console.WriteLine(cc1[i].InitCamera());
+//}
+////cc1[0].GetImages();
+//Console.ReadKey();
+//return;
 
-//var vv = new HKGigeTriggerCamera("00J39700886");
-var vv = new HKGigeLineCamera("00J39700886");
-vv.InitCamera();
-vv.StartGrabbing();
+////var vv = new HKGigeTriggerCamera("00J39700886");
+//var vv = new HKGigeLineCamera("00J39700886");
+//vv.InitCamera();
+//vv.StartGrabbing();
 
-Console.ReadKey();
-vv.GetImage(out var ba);
-//File.WriteAllBytes($"linliu.bmp", ba);
+//Console.ReadKey();
+//vv.GetImage(out var ba);
+////File.WriteAllBytes($"linliu.bmp", ba);
 
 
-return;
+//return;
 var cc = HKGigeTriggerCamera.CreateCameras(new List<string> { "00D08414152", "J58494175" });
 //HKGigeCamera HKGigeCamera = new HKGigeCamera("00D08414152");
 //cc[0].ConnectCamera();
-cc[0].SetIp("192.168.1.184");
+cc[0].SetIp("192.168.1.159");
+cc[1].SetIp("192.168.1.156");
 for (int i = 0; i < cc.Count; i++)
 {
     Console.WriteLine(cc[i].InitCamera());
 }
 for (int i = 0; i < cc.Count; i++)
 {
-    for (int j = 0; j < 100; j++)
+    for (int j = 0; j < 10; j++)
     {
         //cc[i].SetExposureTime((uint)(1000 * (j + 1)));
-        Console.WriteLine($"拍照: {cc[i].GetImage(out byte[] img)}"); ;
-        cc[i].CheckConnect();
+        Console.WriteLine("连接状态: {0}", cc[i].CheckConnect());
+        var aa = cc[i].GetImage(out byte[] img);
+
+        Console.WriteLine($"拍照: {aa}"); 
+        if (aa)
         File.WriteAllBytes($"linliu{j}+{i}.bmp", img);
+        await Task.Delay(100);
         //display(path);
         //Console.ReadKey();
     }

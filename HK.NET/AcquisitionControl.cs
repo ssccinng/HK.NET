@@ -10,6 +10,34 @@ using static MvCamCtrl.NET.MyCamera;
 
 namespace HK.NET
 {
+    public enum TriggerSelectorType
+    {
+        AcquisitionStart,
+
+        AcquisitionEnd,
+
+        AcquisitionActive,
+
+        FrameStart,
+
+        FrameEnd,
+
+        FrameActive,
+
+        FrameBurstStart,
+
+        FrameBurstEnd,
+
+        FrameBurstActive,
+
+        LineStart,
+
+        ExposureStart,
+
+        ExposureEnd,
+        ExposureActive
+
+    }
     public enum TriggerActivation
     {
         RisingEdge,
@@ -29,6 +57,10 @@ namespace HK.NET
     public class AcquisitionControl
     {
         /// <summary>
+        /// 触发事件选择
+        /// </summary>
+        public TriggerSelectorType? TriggerSelector { get; set; }
+        /// <summary>
         /// 采集模式
         /// </summary>
         public MV_CAM_ACQUISITION_MODE? AcquisitionMode { get; set; }
@@ -43,8 +75,8 @@ namespace HK.NET
         /// <summary>
         /// 行频使能设置
         /// </summary>
-        public bool? AcquisitionLineRateEnable {get;set;}
-            
+        public bool? AcquisitionLineRateEnable { get; set; }
+
         /// <summary>
         /// 触发模式
         /// </summary>

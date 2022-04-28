@@ -95,84 +95,29 @@ namespace HK.NET
             Bitmap bitmap = new Bitmap((int)MaxWidth, 1800);
             using Graphics graph = Graphics.FromImage(bitmap);
             imageBytes = null;
-            if (!GetPayloadSize(out var stParam)) return false;
-            UInt32 nPayloadSize = stParam.nCurValue;
-            IntPtr pBufForDriver = Marshal.AllocHGlobal((int)nPayloadSize);
-            IntPtr pBufForSaveImage = IntPtr.Zero;
-            //MV_FRAME_OUT_INFO_EX FrameInfo = new();
-            int nRet = 0;
-            int idx = 0;
-            while (FrameInfoQueue.Count > 0)
-            {
-                (IntPtr pdata, MV_FRAME_OUT_INFO_EX FrameInfo) = FrameInfoQueue.Dequeue();
-                Console.WriteLine("Get One Frame:" + "Width[" + Convert.ToString(FrameInfo.nWidth) + "] , Height[" + Convert.ToString(FrameInfo.nHeight)
-                           + "] , FrameNum[" + Convert.ToString(FrameInfo.nFrameNum) + "]");
-
-                if (pBufForSaveImage == IntPtr.Zero)
-                {
-                    pBufForSaveImage = Marshal.AllocHGlobal((int)(FrameInfo.nHeight * FrameInfo.nWidth * 3 + 2048));
-                }
-
-                MV_SAVE_IMAGE_PARAM_EX stSaveParam = new MV_SAVE_IMAGE_PARAM_EX();
-                stSaveParam.enImageType = MyCamera.MV_SAVE_IAMGE_TYPE.MV_Image_Bmp;
-                stSaveParam.enPixelType = FrameInfo.enPixelType;
-                //stSaveParam.pData = pBufForDriver;
-                stSaveParam.pData = pdata;
-                stSaveParam.nDataLen = FrameInfo.nFrameLen;
-                stSaveParam.nHeight = FrameInfo.nHeight;
-                stSaveParam.nWidth = FrameInfo.nWidth;
-                stSaveParam.pImageBuffer = pBufForSaveImage;
-                stSaveParam.nBufferSize = (uint)(FrameInfo.nHeight * FrameInfo.nWidth * 3 + 2048);
-                stSaveParam.nJpgQuality = 80;
-                nRet = _myCamera.MV_CC_SaveImageEx_NET(ref stSaveParam);
-                if (MyCamera.MV_OK != nRet)
-                {
-                    Console.WriteLine("Save Image failed:{0:x8}", nRet);
-                    return false;
-                }
-
-                // ch:将图像数据保存到本地文件 | en:Save image data to local file
-                imageBytes = new byte[stSaveParam.nImageLen];
-                Marshal.Copy(pBufForSaveImage, imageBytes, 0, (int)stSaveParam.nImageLen);
-                File.WriteAllBytes($"{idx}.bmp", imageBytes);
-                var image1 = Image.FromStream(new MemoryStream(imageBytes));
-                //image1.Save();
-                {
-                    //graph.DrawImage(image1, 0, idx * 2);
-                    graph.DrawImage(image1, 0, idx * 2, width: MaxWidth, height: 2);
-                    idx++;
-                    //graph.DrawImage(newImg, 0, sourceImg.Height, newImg.Width, newImg.Height);
-                }
-            }
-
-
-           
-            //while (true)
+            //if (!GetPayloadSize(out var stParam)) return false;
+            //UInt32 nPayloadSize = stParam.nCurValue;
+            //IntPtr pBufForDriver = Marshal.AllocHGlobal((int)nPayloadSize);
+            //IntPtr pBufForSaveImage = IntPtr.Zero;
+            ////MV_FRAME_OUT_INFO_EX FrameInfo = new();
+            //int nRet = 0;
+            //int idx = 0;
+            //while (FrameInfoQueue.Count > 0)
             //{
-            //    nRet = _myCamera.MV_CC_GetOneFrameTimeout_NET(pBufForDriver, nPayloadSize, ref FrameInfo, 1000);
-            //    if (nRet != MV_OK) break;
-                
-
-            //}
-
-            bitmap.Save("揽镜.bmp");
-            //var nRet = 
-            //var nRet = _myCamera.mvccgetfra(pBufForDriver, nPayloadSize, ref FrameInfo, 1000);
-            // ch:获取一帧图像 | en:Get one image
-            //if (MyCamera.MV_OK == nRet)
-            //{
+            //    (IntPtr pdata, MV_FRAME_OUT_INFO_EX FrameInfo) = FrameInfoQueue.Dequeue();
             //    Console.WriteLine("Get One Frame:" + "Width[" + Convert.ToString(FrameInfo.nWidth) + "] , Height[" + Convert.ToString(FrameInfo.nHeight)
-            //                    + "] , FrameNum[" + Convert.ToString(FrameInfo.nFrameNum) + "]");
+            //               + "] , FrameNum[" + Convert.ToString(FrameInfo.nFrameNum) + "]");
 
             //    if (pBufForSaveImage == IntPtr.Zero)
             //    {
             //        pBufForSaveImage = Marshal.AllocHGlobal((int)(FrameInfo.nHeight * FrameInfo.nWidth * 3 + 2048));
             //    }
 
-            //    MyCamera.MV_SAVE_IMAGE_PARAM_EX stSaveParam = new MyCamera.MV_SAVE_IMAGE_PARAM_EX();
+            //    MV_SAVE_IMAGE_PARAM_EX stSaveParam = new MV_SAVE_IMAGE_PARAM_EX();
             //    stSaveParam.enImageType = MyCamera.MV_SAVE_IAMGE_TYPE.MV_Image_Bmp;
             //    stSaveParam.enPixelType = FrameInfo.enPixelType;
-            //    stSaveParam.pData = pBufForDriver;
+            //    //stSaveParam.pData = pBufForDriver;
+            //    stSaveParam.pData = pdata;
             //    stSaveParam.nDataLen = FrameInfo.nFrameLen;
             //    stSaveParam.nHeight = FrameInfo.nHeight;
             //    stSaveParam.nWidth = FrameInfo.nWidth;
@@ -189,23 +134,29 @@ namespace HK.NET
             //    // ch:将图像数据保存到本地文件 | en:Save image data to local file
             //    imageBytes = new byte[stSaveParam.nImageLen];
             //    Marshal.Copy(pBufForSaveImage, imageBytes, 0, (int)stSaveParam.nImageLen);
-            //    //try
-            //    //{
-            //    //    path = $"{_code}frame.bmp";
-            //    //    FileStream pFile = new FileStream(path, FileMode.Create);
-            //    //    pFile.Write(data, 0, data.Length);
-            //    //    pFile.Close();
-            //    //}
-            //    //catch
-            //    //{
+            //    File.WriteAllBytes($"{idx}.bmp", imageBytes);
+            //    var image1 = Image.FromStream(new MemoryStream(imageBytes));
+            //    //image1.Save();
+            //    {
+            //        //graph.DrawImage(image1, 0, idx * 2);
+            //        graph.DrawImage(image1, 0, idx * 2, width: MaxWidth, height: 2);
+            //        idx++;
+            //        //graph.DrawImage(newImg, 0, sourceImg.Height, newImg.Width, newImg.Height);
+            //    }
+            //}
 
-            //    //}
-            //}
-            //else
-            //{
-            //    Console.WriteLine("No data:{0:x8}", nRet);
-            //    return false;
-            //}
+
+           
+            ////while (true)
+            ////{
+            ////    nRet = _myCamera.MV_CC_GetOneFrameTimeout_NET(pBufForDriver, nPayloadSize, ref FrameInfo, 1000);
+            ////    if (nRet != MV_OK) break;
+                
+
+            ////}
+
+            //bitmap.Save("揽镜.bmp");
+
             return true;
         }
     }
