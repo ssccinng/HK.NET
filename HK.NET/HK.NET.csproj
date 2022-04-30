@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <Reference Include="MvCameraControl.Net">
-      <HintPath>D:\MVS\Development\DotNet\AnyCpu\MvCameraControl.Net.dll</HintPath>
+      <HintPath>MvCameraControl.Net.dll</HintPath>
     </Reference>
   </ItemGroup>
 
