@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace HK.NET
 {
-    public class HKTestMCam : HKGigeCamera
+    internal class HKTestMCam : HKGigeCamera
     {
         public HKTestMCam(string code) : base(code)
         {

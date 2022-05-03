@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MvCamCtrl.NET;
+
 using static MvCamCtrl.NET.MyCamera;
 using System.Runtime.InteropServices;
 using System.Drawing;
