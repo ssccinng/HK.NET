@@ -29,7 +29,6 @@
   <ItemGroup>
     <Reference Include="MvCameraControl.Net">
       <HintPath>MvCameraControl.Net.dll</HintPath>
-		<!--<RequiredTargetFramework></RequiredTargetFramework>-->
     </Reference>
   </ItemGroup>
 
