@@ -3,7 +3,7 @@ using HK.NET;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using static HKTest.Class1;
-
+var aaa = SciHKCore.GetDeviceInfoListFull();
 
 
 

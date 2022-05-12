@@ -34,7 +34,6 @@ namespace HK.NET
             {
                 pBufForSaveImage = Marshal.AllocHGlobal((int)(pFrameInfo.nHeight * pFrameInfo.nWidth * 3 + 2048));
             }
-
             MV_SAVE_IMAGE_PARAM_EX stSaveParam = new MV_SAVE_IMAGE_PARAM_EX();
             stSaveParam.enImageType = MyCamera.MV_SAVE_IAMGE_TYPE.MV_Image_Bmp;
             stSaveParam.enPixelType = pFrameInfo.enPixelType;
@@ -50,6 +49,7 @@ namespace HK.NET
 
             byte[] imageBytes = new byte[stSaveParam.nImageLen];
             Marshal.Copy(pBufForSaveImage, imageBytes, 0, (int)imageBytes.Length);
+            Marshal.FreeHGlobal(pBufForSaveImage);
 
             if (MyCamera.MV_OK != nRet)
             {
@@ -57,7 +57,6 @@ namespace HK.NET
                 //return (false, null);
                 return;
             }
-
             //FrameInfoQueue.Enqueue((pData, pFrameInfo));
             FrameInfoQueue.Enqueue(imageBytes);
             //pFrameInfo.
