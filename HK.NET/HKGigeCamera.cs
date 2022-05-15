@@ -877,12 +877,15 @@ namespace HK.NET
                     if (MyCamera.MV_OK != nRet)
                     {
                         Console.WriteLine("Save Image failed:{0:x8}", nRet);
+                        Marshal.FreeHGlobal(pBufForSaveImage);
+
                         continue;
                     }
 
                     // ch:将图像数据保存到本地文件 | en:Save image data to local file
                     byte[] data = new byte[stSaveParam.nImageLen];
                     Marshal.Copy(pBufForSaveImage, data, 0, (int)stSaveParam.nImageLen);
+
                     try
                     {
                         FileStream pFile = new FileStream($"{_code}frame{i}.bmp", FileMode.Create);
@@ -893,6 +896,11 @@ namespace HK.NET
                     {
 
                     }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(pBufForSaveImage);
+
+                    }
                     continue;
                 }
                 else
@@ -900,6 +908,8 @@ namespace HK.NET
                     Console.WriteLine("No data:{0:x8}", nRet);
                 }
             }
+
+            Marshal.FreeHGlobal(pBufForDriver);
             return true;
         }
 
