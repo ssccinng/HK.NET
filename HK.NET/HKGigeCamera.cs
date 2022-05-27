@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -1071,7 +1072,7 @@ namespace HK.NET
                 imageBytes = new byte[stSaveParam.nImageLen];
                 Marshal.Copy(pBufForSaveImage, imageBytes, 0, (int)stSaveParam.nImageLen);
                 Marshal.FreeHGlobal(pBufForSaveImage);
-
+                Marshal.FreeHGlobal(pBufForDriver);
                 //try
                 //{
                 //    path = $"{_code}frame.bmp";
@@ -1090,6 +1091,7 @@ namespace HK.NET
                 Marshal.FreeHGlobal(pBufForDriver);
                 return false;
             }
+
             return true;
 
         }
