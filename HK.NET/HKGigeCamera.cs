@@ -563,6 +563,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置倍频失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -577,6 +579,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置倍频失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -591,6 +595,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置行频使能失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -605,7 +611,10 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置行频使能失败: {0}", nRet);
+                return false;
+
             }
+            
             return true;
         }
         public bool SetTriggerSelector(TriggerSelectorType triggerSelectorType)
@@ -614,6 +623,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置行频使能失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -628,6 +639,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置倍频失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -638,6 +651,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置图像宽度失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -652,6 +667,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置图像高度失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -661,6 +678,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置图像OffsetX失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -670,6 +689,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置图像OffsetY失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -680,6 +701,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置分频器输入源失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -689,6 +712,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置分频器信号方向失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -698,6 +723,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置分频器预分频失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -707,6 +734,8 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置分频器倍频失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
@@ -716,9 +745,68 @@ namespace HK.NET
             if (nRet != MV_OK)
             {
                 Debug.WriteLine("设置分频器后分频失败: {0}", nRet);
+                return false;
+
             }
             return true;
         }
+
+        public bool SetGain(float value)
+        {
+            var nRet = _myCamera.MV_CC_SetFloatValue_NET("Gain", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置增益失败: {0}", nRet);
+                return false;
+
+            }
+            return true;
+        }
+
+        public bool SetGainAuto(GainAutoType value)
+        {
+            var nRet = _myCamera.MV_CC_SetEnumValue_NET("GainAuto", (uint)value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置自动增益模式失败: {0}", nRet);
+                return false;
+
+            }
+            return true;
+        }
+
+        public bool SetAutoGainLowerLimit(float value)
+        {
+            var nRet = _myCamera.MV_CC_SetFloatValue_NET("AutoGainLowerLimit", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置自动增益下限失败: {0}", nRet);
+                return false;
+
+            }
+            return true;
+        }
+        public bool SetAutoGainUpperLimit(float value)
+        {
+            var nRet = _myCamera.MV_CC_SetFloatValue_NET("AutoGainupperLimit", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置自动增益上限失败: {0}", nRet);
+                return false;
+            }
+            return true;
+        }
+
+        public bool SetADCGainEnable(bool value)
+        {
+            var nRet = _myCamera.MV_CC_SetBoolValue_NET("ADCGainEnable", value);
+            if (nRet != MV_OK)
+            {
+                Debug.WriteLine("设置ADC使能失败: {0}", nRet);
+            }
+            return true;
+        }
+
 
         public virtual bool GetImage(out byte[] imageBytes)
         {
@@ -821,6 +909,37 @@ namespace HK.NET
             }
             return flag;
         }
+
+
+        public bool SetAnalogControl(AnalogControl analogControl)
+        {
+            bool flag = true;
+
+            if (analogControl.ADCGainEnable != null)
+            {
+                flag &= SetADCGainEnable(analogControl.ADCGainEnable.Value);
+            }
+            if (analogControl.Gain != null)
+            {
+                flag &= SetGain(analogControl.Gain.Value);
+            }
+            if (analogControl.GainAuto != null)
+            {
+                flag &= SetGainAuto(analogControl.GainAuto.Value);
+            }
+            if (analogControl.AutoGainUpperLimit != null)
+            {
+                flag &= SetAutoGainUpperLimit(analogControl.AutoGainUpperLimit.Value);
+            }
+            if (analogControl.AutoGainLowerLimit != null)
+            {
+                flag &= SetAutoGainLowerLimit(analogControl.AutoGainLowerLimit.Value);
+            }
+            
+
+            return flag;
+        }
+        
         //public bool SetTriggerSelector()
         /// <summary>
         /// IP转换工具

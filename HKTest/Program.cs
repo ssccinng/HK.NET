@@ -4,10 +4,13 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using static HKTest.Class1;
 var aaa = SciHKCore.GetDeviceInfoListFull();
-var c = new HKGigeTriggerCamera("00C19547937");
-c.SetIp("192.168.1.77");
+// var c = new HKGigeTriggerCamera("00C19547937");
+var c = new HKGigeTriggerCamera("00K07937647");
+c.SetIp("192.168.1.88");
 c.InitCamera();
-c.SetExposureTime(10000);
+c.SetADCGainEnable(true);
+c.SetGain(0);
+c.SetExposureTime(100000);
 for (int i = 0; i < 100; i++)
 {
     if (!c.CheckConnect())
@@ -16,13 +19,13 @@ for (int i = 0; i < 100; i++)
         Console.WriteLine("断连");
         c.DestroyDevice();
         //c.CloseDevice();
-        c = new HKGigeTriggerCamera("00C19547937");
+        c = new HKGigeTriggerCamera("00K07937647");
         c.InitCamera();
         c.SetExposureTime(10000);
     }
     if (c.GetImage(out var img))
     {
-        File.WriteAllBytes($"测试{i}.bmp", img);
+        File.WriteAllBytes($"测试1{i}.bmp", img);
 
     }
     Console.ReadKey();
